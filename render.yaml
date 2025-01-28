@@ -9,7 +9,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 10000
+        value: "10000"
       - key: DATABASE_URL
         value: postgresql://neondb_owner:npg_u2A8jOhEfLrF@ep-old-glitter-a86pwjol-pooler.eastus2.azure.neon.tech/neondb?sslmode=require
       - key: JWT_SECRET
