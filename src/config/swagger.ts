@@ -14,8 +14,12 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:3000',
-        description: 'Servidor de Desenvolvimento'
+        url: process.env.NODE_ENV === 'production' 
+          ? 'https://even4-api.onrender.com' 
+          : 'http://localhost:3000',
+        description: process.env.NODE_ENV === 'production' 
+          ? 'Servidor de Produção' 
+          : 'Servidor de Desenvolvimento'
       }
     ],
     components: {
