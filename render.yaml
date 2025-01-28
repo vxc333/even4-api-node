@@ -1,7 +1,7 @@
 services:
   - type: web
     name: even4-api
-    env: node
+    runtime: node
     plan: free
     buildCommand: npm install && npm run build
     startCommand: npm start
