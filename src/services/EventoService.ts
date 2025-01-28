@@ -64,4 +64,18 @@ export class EventoService {
   async removerParticipante(eventoId: number, participanteId: number): Promise<void> {
     await this.repository.removerParticipante(eventoId, participanteId);
   }
+
+  async getDashboardParticipantes(eventoId: number) {
+    const participantes = await this.repository.listarParticipantes(eventoId);
+    return {
+      total: participantes.length,
+      confirmados: participantes.filter(p => p.status === 'CONFIRMADO').length,
+      recusados: participantes.filter(p => p.status === 'RECUSADO').length,
+      pendentes: participantes.filter(p => p.status === 'PENDENTE').length
+    };
+  }
+
+  async buscarPorId(id: number) {
+    return this.repository.buscarPorId(id);
+  }
 } 
