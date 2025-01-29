@@ -5,19 +5,11 @@ import swaggerUi from 'swagger-ui-express';
 import { specs } from './config/swagger';
 import routes from './routes';
 import healthRoutes from './routes/health.routes';
+import { corsOptions } from './config/cors';
 
 const app = express();
 
-// Configuração do CORS
-const corsOptions = {
-  origin: process.env.CORS_ORIGIN || '*',
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  credentials: true,
-  maxAge: 3600
-};
-
+// CORS deve vir antes de outras middlewares
 app.use(cors(corsOptions));
 app.use(express.json());
 
