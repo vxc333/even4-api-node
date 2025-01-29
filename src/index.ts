@@ -5,17 +5,21 @@ import swaggerUi from 'swagger-ui-express';
 import { specs } from './config/swagger';
 import routes from './routes';
 import healthRoutes from './routes/health.routes';
-import { corsOptions } from './config/cors';
 
 const app = express();
 
-// Middleware CORS personalizado
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  next();
-});
+// Configuração CORS mais permissiva
+app.use(cors({
+  origin: true, // Permite todas as origens
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
+}));
+
+// Habilitar preflight para todas as rotas
+app.options('*', cors());
 
 app.use(express.json());
 
