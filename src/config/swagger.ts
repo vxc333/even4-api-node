@@ -105,6 +105,15 @@ const options = {
           properties: {
             erro: { type: 'string' }
           }
+        },
+        Local: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer' },
+            latitude: { type: 'number', format: 'float' },
+            longitude: { type: 'number', format: 'float' },
+            endereco: { type: 'string' }
+          }
         }
       },
       securitySchemes: {
@@ -130,6 +139,10 @@ const options = {
       {
         name: 'Participantes',
         description: 'Gerenciamento de participantes'
+      },
+      {
+        name: 'Locais',
+        description: 'Operações com locais'
       }
     ]
   },
