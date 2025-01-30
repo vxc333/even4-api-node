@@ -21,10 +21,22 @@ const localController = new LocalController();
  *             type: object
  *             required:
  *               - endereco
+ *               - latitude
+ *               - longitude
  *             properties:
  *               endereco:
  *                 type: string
  *                 example: "Av Paulista, 1000 - São Paulo"
+ *               latitude:
+ *                 type: number
+ *                 minimum: -90
+ *                 maximum: 90
+ *                 example: -23.5505
+ *               longitude:
+ *                 type: number
+ *                 minimum: -180
+ *                 maximum: 180
+ *                 example: -46.6333
  *     responses:
  *       201:
  *         description: Local criado com sucesso
@@ -34,6 +46,14 @@ const localController = new LocalController();
  *               $ref: '#/components/schemas/Local'
  *       400:
  *         description: Dados inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 erro:
+ *                   type: string
+ *                   example: "Latitude inválida. Deve ser um número entre -90 e 90"
  *   get:
  *     summary: Listar todos os locais
  *     tags: [Locais]
@@ -66,6 +86,7 @@ router.get('/', authMiddleware, localController.listar);
  *         required: true
  *         schema:
  *           type: integer
+ *         description: ID do local
  *     responses:
  *       200:
  *         description: Local encontrado
@@ -86,9 +107,18 @@ router.get('/', authMiddleware, localController.listar);
  *         required: true
  *         schema:
  *           type: integer
+ *         description: ID do local
  *     responses:
  *       200:
  *         description: Local deletado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 mensagem:
+ *                   type: string
+ *                   example: "Local deletado com sucesso"
  *       404:
  *         description: Local não encontrado
  */

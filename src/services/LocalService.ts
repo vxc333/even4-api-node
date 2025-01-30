@@ -36,9 +36,8 @@ export class LocalService {
     }
   }
 
-  async criarLocal(endereco: string): Promise<Local> {
-    const coordenadas = await this.getGeocode(endereco);
-    return this.repository.criar({ endereco, ...coordenadas });
+  async criarLocal(local: Local): Promise<Local> {
+    return this.repository.criar(local);
   }
 
   async listarLocais(): Promise<Local[]> {

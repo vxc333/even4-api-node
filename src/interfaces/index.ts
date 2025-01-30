@@ -18,9 +18,9 @@ export interface Evento {
 
 export interface Local {
   id?: number;
-  latitude: number;
-  longitude: number;
   endereco: string;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export interface Participante {

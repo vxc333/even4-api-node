@@ -108,11 +108,28 @@ const options = {
         },
         Local: {
           type: 'object',
+          required: ['endereco', 'latitude', 'longitude'],
           properties: {
-            id: { type: 'integer' },
-            latitude: { type: 'number', format: 'float' },
-            longitude: { type: 'number', format: 'float' },
-            endereco: { type: 'string' }
+            id: { 
+              type: 'integer',
+              example: 1
+            },
+            endereco: { 
+              type: 'string',
+              example: "Av Paulista, 1000 - São Paulo"
+            },
+            latitude: { 
+              type: 'number',
+              minimum: -90,
+              maximum: 90,
+              example: -23.5505
+            },
+            longitude: { 
+              type: 'number',
+              minimum: -180,
+              maximum: 180,
+              example: -46.6333
+            }
           }
         }
       },

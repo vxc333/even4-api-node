@@ -14,13 +14,34 @@ export class LocalController {
 
   async criar(req: Request, res: Response): Promise<Response> {
     try {
-      const { endereco } = req.body;
+      const { endereco, latitude, longitude } = req.body;
       
-      if (!endereco) {
-        return res.status(400).json({ erro: 'Endereço é obrigatório' });
+      if (!endereco || latitude === undefined || longitude === undefined) {
+        return res.status(400).json({ 
+          erro: 'Endereço, latitude e longitude são obrigatórios' 
+        });
       }
 
-      const local = await this.service.criarLocal(endereco);
+      // Validar formato da latitude (-90 a 90)
+      if (typeof latitude !== 'number' || latitude < -90 || latitude > 90) {
+        return res.status(400).json({ 
+          erro: 'Latitude inválida. Deve ser um número entre -90 e 90' 
+        });
+      }
+
+      // Validar formato da longitude (-180 a 180)
+      if (typeof longitude !== 'number' || longitude < -180 || longitude > 180) {
+        return res.status(400).json({ 
+          erro: 'Longitude inválida. Deve ser um número entre -180 e 180' 
+        });
+      }
+
+      const local = await this.service.criarLocal({
+        endereco,
+        latitude,
+        longitude
+      });
+
       return res.status(201).json(local);
     } catch (error) {
       return res.status(400).json({ 
