@@ -3,13 +3,17 @@ services:
     name: even4-api
     runtime: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm install && npm run db:init
     startCommand: npm start
     envVars:
       - key: NODE_ENV
+        value: production
       - key: PORT
+        value: "3000"
       - key: DATABASE_URL
+        value: postgresql://neondb_owner:npg_u2A8jOhEfLrF@ep-old-glitter-a86pwjol-pooler.eastus2.azure.neon.tech/neondb?sslmode=require
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ORIGIN
+        value: https://even4-api.onrender.com,https://even-4-api.onrender.com,https://even4-api.onrender.com/api-docs,https://even-4-api.onrender.com/api-docs
     healthCheckPath: /health 

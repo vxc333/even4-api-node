@@ -10,15 +10,15 @@ export class EventoRepository {
   }
 
   async criar(evento: Evento): Promise<Evento> {
-    const { nome, data, hora, descricao, criador_id, local_id } = evento;
+    const { nome, data, hora, descricao, criador_id, latitude, longitude, endereco } = evento;
     const query = `
-      INSERT INTO eventos (nome, data, hora, descricao, criador_id, local_id)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      INSERT INTO eventos (nome, data, hora, descricao, criador_id, latitude, longitude, endereco)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING *
     `;
     
     const result = await this.db.query(query, [
-      nome, data, hora, descricao, criador_id, local_id
+      nome, data, hora, descricao, criador_id, latitude, longitude, endereco
     ]);
     
     return result.rows[0];
@@ -26,9 +26,8 @@ export class EventoRepository {
 
   async listarEventos(usuarioId: number): Promise<Evento[]> {
     const query = `
-      SELECT e.*, l.latitude, l.longitude, l.endereco
+      SELECT e.*
       FROM eventos e
-      LEFT JOIN locais l ON e.local_id = l.id
       WHERE e.criador_id = $1 OR EXISTS (
         SELECT 1 FROM participantes p 
         WHERE p.evento_id = e.id AND p.usuario_id = $1
@@ -44,20 +43,16 @@ export class EventoRepository {
     const query = `
       SELECT 
         e.*,
-        l.latitude,
-        l.longitude,
-        l.endereco,
         COUNT(p.id) as total_participantes,
         SUM(CASE WHEN p.status = 'CONFIRMADO' THEN 1 ELSE 0 END) as confirmados
       FROM eventos e
-      LEFT JOIN locais l ON e.local_id = l.id
       LEFT JOIN participantes p ON e.id = p.evento_id
       WHERE (e.criador_id = $1 OR EXISTS (
         SELECT 1 FROM participantes p2 
         WHERE p2.evento_id = e.id AND p2.usuario_id = $1
       ))
       AND e.data < CURRENT_DATE
-      GROUP BY e.id, l.id
+      GROUP BY e.id
       ORDER BY e.data DESC
     `;
     
@@ -69,20 +64,16 @@ export class EventoRepository {
     const query = `
       SELECT 
         e.*,
-        l.latitude,
-        l.longitude,
-        l.endereco,
         COUNT(p.id) as total_participantes,
         SUM(CASE WHEN p.status = 'CONFIRMADO' THEN 1 ELSE 0 END) as confirmados
       FROM eventos e
-      LEFT JOIN locais l ON e.local_id = l.id
       LEFT JOIN participantes p ON e.id = p.evento_id
       WHERE (e.criador_id = $1 OR EXISTS (
         SELECT 1 FROM participantes p2 
         WHERE p2.evento_id = e.id AND p2.usuario_id = $1
       ))
       AND e.data >= CURRENT_DATE
-      GROUP BY e.id, l.id
+      GROUP BY e.id
       ORDER BY e.data ASC
     `;
     
@@ -92,9 +83,8 @@ export class EventoRepository {
 
   async buscarPorId(id: number): Promise<Evento | null> {
     const query = `
-      SELECT e.*, l.latitude, l.longitude, l.endereco
+      SELECT e.*
       FROM eventos e
-      LEFT JOIN locais l ON e.local_id = l.id
       WHERE e.id = $1
     `;
     const result = await this.db.query(query, [id]);

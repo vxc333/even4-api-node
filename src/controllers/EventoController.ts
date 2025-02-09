@@ -20,11 +20,11 @@ export class EventoController {
 
   async criar(req: Request, res: Response): Promise<Response> {
     try {
-      const { nome, data, hora, descricao, local_id, latitude, longitude, endereco } = req.body;
+      const { nome, data, hora, descricao, latitude, longitude, endereco } = req.body;
       
-      // Validações
+      // Validações básicas
       if (!nome || !data || !hora || !descricao) {
-        return res.status(400).json({ erro: 'Todos os campos são obrigatórios' });
+        return res.status(400).json({ erro: 'Nome, data, hora e descrição são obrigatórios' });
       }
 
       // Validar formato da data
@@ -38,9 +38,32 @@ export class EventoController {
         return res.status(400).json({ erro: 'Hora inválida' });
       }
 
+      // Validar latitude e longitude se fornecidos
+      if (latitude !== undefined) {
+        if (typeof latitude !== 'number' || latitude < -90 || latitude > 90) {
+          return res.status(400).json({ 
+            erro: 'Latitude inválida. Deve ser um número entre -90 e 90' 
+          });
+        }
+      }
+
+      if (longitude !== undefined) {
+        if (typeof longitude !== 'number' || longitude < -180 || longitude > 180) {
+          return res.status(400).json({ 
+            erro: 'Longitude inválida. Deve ser um número entre -180 e 180' 
+          });
+        }
+      }
+
       const evento = await this.service.criarEvento({
-        ...req.body,
-        criador_id: req.userId
+        nome,
+        data: dataEvento,
+        hora,
+        descricao,
+        criador_id: req.userId!,
+        latitude: latitude || null,
+        longitude: longitude || null,
+        endereco: endereco || null
       });
 
       return res.status(201).json(evento);
@@ -89,6 +112,20 @@ export class EventoController {
       const { id } = req.params;
       const { usuario_id } = req.body;
       
+      // Verifica se o evento existe
+      const evento = await this.service.buscarPorId(Number(id));
+      if (!evento) {
+        return res.status(404).json({ erro: 'Evento não encontrado' });
+      }
+
+      // Verifica se o usuário já é participante
+      const participantes = await this.service.listarParticipantes(Number(id));
+      const jaParticipante = participantes.some(p => p.usuario_id === usuario_id);
+      
+      if (jaParticipante) {
+        return res.status(400).json({ erro: 'Usuário já é participante deste evento' });
+      }
+
       await this.service.adicionarParticipante(Number(id), usuario_id);
       return res.status(201).json({ mensagem: 'Participante adicionado com sucesso' });
     } catch (error) {
@@ -101,6 +138,13 @@ export class EventoController {
   async listarParticipantes(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
+      
+      // Verifica se o evento existe
+      const evento = await this.service.buscarPorId(Number(id));
+      if (!evento) {
+        return res.status(404).json({ erro: 'Evento não encontrado' });
+      }
+
       const participantes = await this.service.listarParticipantes(Number(id));
       return res.json(participantes);
     } catch (error) {
@@ -131,7 +175,12 @@ export class EventoController {
         return res.status(400).json({ erro: 'Status inválido' });
       }
 
-      await this.service.atualizarStatusParticipante(Number(id), Number(userId), status);
+      await this.service.atualizarStatusParticipante(
+        Number(id),
+        Number(userId),
+        status
+      );
+      
       return res.json({ mensagem: 'Status atualizado com sucesso' });
     } catch (error) {
       return res.status(400).json({ 

@@ -13,14 +13,9 @@ export interface Evento {
   hora: string;
   descricao: string;
   criador_id: number;
-  local_id: number;
-}
-
-export interface Local {
-  id?: number;
-  endereco: string;
   latitude?: number | null;
   longitude?: number | null;
+  endereco?: string | null;
 }
 
 export interface Participante {

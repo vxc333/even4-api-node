@@ -10,6 +10,8 @@ const eventoController = new EventoController();
  *   post:
  *     summary: Criar novo evento
  *     tags: [Eventos]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -21,7 +23,6 @@ const eventoController = new EventoController();
  *               - data
  *               - hora
  *               - descricao
- *               - local_id
  *             properties:
  *               nome:
  *                 type: string
@@ -37,10 +38,19 @@ const eventoController = new EventoController();
  *               descricao:
  *                 type: string
  *                 example: "Descrição do evento de teste"
- *               local_id:
- *                 type: integer
- *                 minimum: 1
- *                 example: 1
+ *               latitude:
+ *                 type: number
+ *                 minimum: -90
+ *                 maximum: 90
+ *                 example: -23.5505
+ *               longitude:
+ *                 type: number
+ *                 minimum: -180
+ *                 maximum: 180
+ *                 example: -46.6333
+ *               endereco:
+ *                 type: string
+ *                 example: "Av Paulista, 1000 - São Paulo"
  *     responses:
  *       201:
  *         description: Evento criado com sucesso
@@ -118,6 +128,7 @@ router.get('/futuros', eventoController.listarEventosFuturos);
  *         required: true
  *         schema:
  *           type: integer
+ *         description: ID do evento
  *     requestBody:
  *       required: true
  *       content:
@@ -129,9 +140,30 @@ router.get('/futuros', eventoController.listarEventosFuturos);
  *             properties:
  *               usuario_id:
  *                 type: integer
+ *                 description: ID do usuário a ser adicionado
  *     responses:
  *       201:
  *         description: Participante adicionado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 mensagem:
+ *                   type: string
+ *                   example: "Participante adicionado com sucesso"
+ *       400:
+ *         description: Erro de validação
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 erro:
+ *                   type: string
+ *                   example: "Usuário já é participante deste evento"
+ *       404:
+ *         description: Evento não encontrado
  *   get:
  *     summary: Listar participantes do evento
  *     tags: [Participantes]
@@ -141,6 +173,7 @@ router.get('/futuros', eventoController.listarEventosFuturos);
  *         required: true
  *         schema:
  *           type: integer
+ *         description: ID do evento
  *     responses:
  *       200:
  *         description: Lista de participantes
@@ -150,13 +183,17 @@ router.get('/futuros', eventoController.listarEventosFuturos);
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Participante'
+ *       404:
+ *         description: Evento não encontrado
+ *       400:
+ *         description: Erro ao listar participantes
  */
 router.post('/:id/participantes', eventoController.adicionarParticipante);
 router.get('/:id/participantes', eventoController.listarParticipantes);
 
 /**
  * @swagger
- * /api/eventos/{id}/participantes/status:
+ * /api/eventos/{id}/participantes/{userId}/status:
  *   put:
  *     summary: Atualizar status do participante
  *     tags: [Participantes]
@@ -166,6 +203,13 @@ router.get('/:id/participantes', eventoController.listarParticipantes);
  *         required: true
  *         schema:
  *           type: integer
+ *         description: ID do evento
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID do usuário participante
  *     requestBody:
  *       required: true
  *       content:
@@ -181,8 +225,12 @@ router.get('/:id/participantes', eventoController.listarParticipantes);
  *     responses:
  *       200:
  *         description: Status atualizado com sucesso
+ *       400:
+ *         description: Dados inválidos
+ *       404:
+ *         description: Participante não encontrado
  */
-router.put('/:id/participantes/status', eventoController.atualizarStatusParticipante);
+router.put('/:id/participantes/:userId/status', eventoController.atualizarStatusParticipante);
 
 // Novo endpoint para dashboard de participantes
 router.get('/:id/participantes/dashboard', eventoController.getDashboardParticipantes);
@@ -235,5 +283,45 @@ router.delete('/:id', eventoController.deletarEvento);
  *         description: Evento não encontrado
  */
 router.delete('/:id/participantes/:participanteId', eventoController.removerParticipante);
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Evento:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *           example: 1
+ *         nome:
+ *           type: string
+ *           example: "Evento de Teste"
+ *         data:
+ *           type: string
+ *           format: date
+ *           example: "2025-01-28"
+ *         hora:
+ *           type: string
+ *           example: "15:00"
+ *         descricao:
+ *           type: string
+ *           example: "Descrição do evento de teste"
+ *         criador_id:
+ *           type: integer
+ *           example: 1
+ *         latitude:
+ *           type: number
+ *           example: -23.5505
+ *         longitude:
+ *           type: number
+ *           example: -46.6333
+ *         endereco:
+ *           type: string
+ *           example: "Av Paulista, 1000 - São Paulo"
+ *         created_at:
+ *           type: string
+ *           format: date-time
+ */
 
 export default router; 

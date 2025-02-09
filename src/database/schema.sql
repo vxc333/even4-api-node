@@ -1,16 +1,14 @@
+-- Primeiro, dropar todas as tabelas se existirem
+DROP TABLE IF EXISTS participantes;
+DROP TABLE IF EXISTS eventos;
+DROP TABLE IF EXISTS usuarios;
+
 CREATE TABLE IF NOT EXISTS usuarios (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     senha VARCHAR(255) NOT NULL,
     telefone VARCHAR(20) NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS locais (
-    id SERIAL PRIMARY KEY,
-    latitude DECIMAL(10,8) NULL,
-    longitude DECIMAL(11,8) NULL,
-    endereco TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS eventos (
@@ -20,7 +18,9 @@ CREATE TABLE IF NOT EXISTS eventos (
     hora TIME NOT NULL,
     descricao TEXT,
     criador_id INTEGER REFERENCES usuarios(id),
-    local_id INTEGER REFERENCES locais(id),
+    latitude DECIMAL(10,8),
+    longitude DECIMAL(11,8),
+    endereco TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
