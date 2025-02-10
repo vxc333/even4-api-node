@@ -14,7 +14,7 @@ export class UsuarioRepository {
     const query = `
       INSERT INTO usuarios (nome, email, senha, telefone)
       VALUES ($1, $2, $3, $4)
-      RETURNING *
+      RETURNING id, nome, email, telefone
     `;
     
     const result = await this.db.query(query, [nome, email, senha, telefone]);
@@ -22,13 +22,21 @@ export class UsuarioRepository {
   }
 
   async buscarPorEmail(email: string): Promise<Usuario | null> {
-    const query = 'SELECT * FROM usuarios WHERE email = $1';
+    const query = `
+      SELECT id, nome, email, senha, telefone
+      FROM usuarios 
+      WHERE email = $1
+    `;
     const result = await this.db.query(query, [email]);
     return result.rows[0] || null;
   }
 
   async buscarPorId(id: number): Promise<Usuario | null> {
-    const query = 'SELECT * FROM usuarios WHERE id = $1';
+    const query = `
+      SELECT id, nome, email, telefone
+      FROM usuarios 
+      WHERE id = $1
+    `;
     const result = await this.db.query(query, [id]);
     return result.rows[0] || null;
   }
@@ -99,5 +107,51 @@ export class UsuarioRepository {
       WHERE criador_id = $1
     `;
     await this.db.query(queryEventos, [id]);
+  }
+
+  async listarOuBuscarUsuarios(termo?: string): Promise<Omit<Usuario, 'senha'>[]> {
+    try {
+      console.log('Repository: Iniciando query de usuários');
+      let query = `
+        SELECT id, nome, email, telefone
+        FROM usuarios
+      `;
+      
+      let params = [];
+      
+      if (termo) {
+        query += ` WHERE LOWER(nome) LIKE LOWER($1)`;
+        params.push(`%${termo}%`);
+      }
+      
+      query += ` ORDER BY nome`;
+      
+      console.log('Repository: Executando query:', query);
+      const result = await this.db.query(query, params);
+      console.log('Repository: Resultados encontrados:', result.rows.length);
+      return result.rows;
+    } catch (error) {
+      console.error('Repository: Erro na query de usuários:', error);
+      throw error;
+    }
+  }
+
+  async listarTodos(): Promise<Omit<Usuario, 'senha'>[]> {
+    try {
+      console.log('Repository: Iniciando query de usuários');
+      const query = `
+        SELECT id, nome, email, telefone
+        FROM usuarios
+        ORDER BY nome
+      `;
+      
+      console.log('Repository: Executando query:', query);
+      const result = await this.db.query(query);
+      console.log('Repository: Resultados encontrados:', result.rows.length);
+      return result.rows;
+    } catch (error) {
+      console.error('Repository: Erro na query de listar usuários:', error);
+      throw error;
+    }
   }
 } 

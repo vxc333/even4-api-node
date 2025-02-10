@@ -16,12 +16,12 @@ export class EventoService {
     return this.repository.listarEventos(usuarioId);
   }
 
-  async listarEventosPassados(usuarioId: number): Promise<Evento[]> {
-    return this.repository.listarEventosPassados(usuarioId);
+  async listarEventosPassados(): Promise<Evento[]> {
+    return this.repository.listarEventosPassados();
   }
 
-  async listarEventosFuturos(usuarioId: number): Promise<Evento[]> {
-    return this.repository.listarEventosFuturos(usuarioId);
+  async listarEventosFuturos(): Promise<Evento[]> {
+    return this.repository.listarEventosFuturos();
   }
 
   async buscarEventoPorId(id: number): Promise<Evento | null> {

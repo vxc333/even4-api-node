@@ -38,8 +38,15 @@ export class UsuarioService {
       throw new Error('Senha inválida');
     }
 
+    if (!usuario.id || isNaN(usuario.id)) {
+      throw new Error('ID de usuário inválido');
+    }
+
     const token = jwt.sign(
-      { id: usuario.id, email: usuario.email },
+      { 
+        id: Number(usuario.id),
+        email: usuario.email 
+      },
       JWT_SECRET,
       { expiresIn: '1d' }
     );
@@ -48,8 +55,12 @@ export class UsuarioService {
     return { token, usuario: usuarioSemSenha };
   }
 
-  async buscarPorId(id: number): Promise<Usuario | null> {
-    return this.repository.buscarPorId(id);
+  async buscarPorId(id: number): Promise<Omit<Usuario, 'senha'> | null> {
+    const usuario = await this.repository.buscarPorId(id);
+    if (!usuario) return null;
+    
+    const { senha: _, ...usuarioSemSenha } = usuario;
+    return usuarioSemSenha;
   }
 
   async atualizarUsuario(id: number, dados: Usuario): Promise<Usuario> {
@@ -106,5 +117,17 @@ export class UsuarioService {
     
     // Por fim, remove o usuário
     await this.repository.deletar(id);
+  }
+
+  async listarOuBuscarUsuarios(termo?: string): Promise<Omit<Usuario, 'senha'>[]> {
+    try {
+      console.log('Service: Iniciando busca de usuários', termo ? `com termo: ${termo}` : 'sem termo');
+      const usuarios = await this.repository.listarOuBuscarUsuarios(termo);
+      console.log('Service: Usuários retornados:', usuarios.length);
+      return usuarios;
+    } catch (error) {
+      console.error('Service: Erro ao buscar usuários:', error);
+      throw error;
+    }
   }
 } 

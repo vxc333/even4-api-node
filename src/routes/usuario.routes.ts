@@ -192,4 +192,52 @@ router.patch('/:id', authMiddleware, usuarioController.atualizarParcial);
  */
 router.delete('/:id', authMiddleware, usuarioController.deletar);
 
+/**
+ * @swagger
+ * /api/usuarios:
+ *   get:
+ *     summary: Listar ou buscar usuários
+ *     tags: [Usuários]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: termo
+ *         schema:
+ *           type: string
+ *         description: Termo opcional para buscar no nome dos usuários
+ *     responses:
+ *       200:
+ *         description: Lista de usuários
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     example: 1
+ *                   nome:
+ *                     type: string
+ *                     example: "João Silva"
+ *                   email:
+ *                     type: string
+ *                     example: "joao@email.com"
+ *                   telefone:
+ *                     type: string
+ *                     example: "11999887766"
+ *       500:
+ *         description: Erro interno do servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 erro:
+ *                   type: string
+ */
+router.get('/', authMiddleware, usuarioController.listarOuBuscarUsuarios);
+
 export default router; 

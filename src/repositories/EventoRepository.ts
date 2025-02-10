@@ -10,18 +10,38 @@ export class EventoRepository {
   }
 
   async criar(evento: Evento): Promise<Evento> {
-    const { nome, data, hora, descricao, criador_id, latitude, longitude, endereco } = evento;
-    const query = `
-      INSERT INTO eventos (nome, data, hora, descricao, criador_id, latitude, longitude, endereco)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      RETURNING *
-    `;
+    const client = await this.db.connect();
     
-    const result = await this.db.query(query, [
-      nome, data, hora, descricao, criador_id, latitude, longitude, endereco
-    ]);
-    
-    return result.rows[0];
+    try {
+      await client.query('BEGIN');
+      
+      const { nome, data, hora, descricao, criador_id, latitude, longitude, endereco } = evento;
+      const queryEvento = `
+        INSERT INTO eventos (nome, data, hora, descricao, criador_id, latitude, longitude, endereco)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING *
+      `;
+      
+      const resultEvento = await client.query(queryEvento, [
+        nome, data, hora, descricao, criador_id, latitude, longitude, endereco
+      ]);
+      
+      // Adiciona o criador como participante confirmado
+      const queryParticipante = `
+        INSERT INTO participantes (evento_id, usuario_id, status)
+        VALUES ($1, $2, 'CONFIRMADO')
+      `;
+      
+      await client.query(queryParticipante, [resultEvento.rows[0].id, criador_id]);
+      
+      await client.query('COMMIT');
+      return resultEvento.rows[0];
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 
   async listarEventos(usuarioId: number): Promise<Evento[]> {
@@ -39,7 +59,7 @@ export class EventoRepository {
     return result.rows;
   }
 
-  async listarEventosPassados(usuarioId: number): Promise<Evento[]> {
+  async listarEventosPassados(): Promise<Evento[]> {
     const query = `
       SELECT 
         e.*,
@@ -47,20 +67,16 @@ export class EventoRepository {
         SUM(CASE WHEN p.status = 'CONFIRMADO' THEN 1 ELSE 0 END) as confirmados
       FROM eventos e
       LEFT JOIN participantes p ON e.id = p.evento_id
-      WHERE (e.criador_id = $1 OR EXISTS (
-        SELECT 1 FROM participantes p2 
-        WHERE p2.evento_id = e.id AND p2.usuario_id = $1
-      ))
-      AND e.data < CURRENT_DATE
+      WHERE e.data < CURRENT_DATE
       GROUP BY e.id
       ORDER BY e.data DESC
     `;
     
-    const result = await this.db.query(query, [usuarioId]);
+    const result = await this.db.query(query);
     return result.rows;
   }
 
-  async listarEventosFuturos(usuarioId: number): Promise<Evento[]> {
+  async listarEventosFuturos(): Promise<Evento[]> {
     const query = `
       SELECT 
         e.*,
@@ -68,16 +84,12 @@ export class EventoRepository {
         SUM(CASE WHEN p.status = 'CONFIRMADO' THEN 1 ELSE 0 END) as confirmados
       FROM eventos e
       LEFT JOIN participantes p ON e.id = p.evento_id
-      WHERE (e.criador_id = $1 OR EXISTS (
-        SELECT 1 FROM participantes p2 
-        WHERE p2.evento_id = e.id AND p2.usuario_id = $1
-      ))
-      AND e.data >= CURRENT_DATE
+      WHERE e.data >= CURRENT_DATE
       GROUP BY e.id
       ORDER BY e.data ASC
     `;
     
-    const result = await this.db.query(query, [usuarioId]);
+    const result = await this.db.query(query);
     return result.rows;
   }
 

@@ -87,7 +87,7 @@ export class EventoController {
 
   async listarEventosPassados(req: Request, res: Response): Promise<Response> {
     try {
-      const eventos = await this.service.listarEventosPassados(req.userId!);
+      const eventos = await this.service.listarEventosPassados();
       return res.json(eventos);
     } catch (error) {
       return res.status(400).json({ 
@@ -98,7 +98,7 @@ export class EventoController {
 
   async listarEventosFuturos(req: Request, res: Response): Promise<Response> {
     try {
-      const eventos = await this.service.listarEventosFuturos(req.userId!);
+      const eventos = await this.service.listarEventosFuturos();
       return res.json(eventos);
     } catch (error) {
       return res.status(400).json({ 

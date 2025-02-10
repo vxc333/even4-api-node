@@ -13,6 +13,7 @@ export class UsuarioController {
     this.atualizar = this.atualizar.bind(this);
     this.atualizarParcial = this.atualizarParcial.bind(this);
     this.deletar = this.deletar.bind(this);
+    this.listarOuBuscarUsuarios = this.listarOuBuscarUsuarios.bind(this);
   }
 
   async criar(req: Request, res: Response): Promise<Response> {
@@ -101,6 +102,24 @@ export class UsuarioController {
     } catch (error) {
       return res.status(400).json({ 
         erro: error instanceof Error ? error.message : 'Erro ao deletar usuário' 
+      });
+    }
+  }
+
+  async listarOuBuscarUsuarios(req: Request, res: Response): Promise<Response> {
+    try {
+      console.log('Iniciando listagem/busca de usuários');
+      const { termo } = req.query;
+      
+      const usuarios = await this.service.listarOuBuscarUsuarios(termo as string);
+      console.log('Usuários encontrados:', usuarios.length);
+      
+      return res.json(usuarios);
+    } catch (error) {
+      console.error('Erro ao listar/buscar usuários:', error);
+      return res.status(500).json({ 
+        erro: 'Erro interno ao listar/buscar usuários',
+        detalhes: error instanceof Error ? error.message : String(error)
       });
     }
   }
